@@ -62,12 +62,15 @@ object_timer = 0 # used to determine when to drop an object
 falling_objects:list[FallingObject] = []
 
 while running:
+    # we always clear the screen and deal with window close events
     screen.fill((0,0,0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    keys = pygame.key.get_pressed()     
+    keys = pygame.key.get_pressed() # also get the pressed keys
     
+    # we have 3 main states, not connected, not game over, and game over
+
     if USE_M5STICK and not m5stick.connected:
         # draw a message to the screen that you are waiting
         text_surface = font.render(f"Waiting for M5Stick Connection", True, (255,255,255)) 
@@ -95,8 +98,7 @@ while running:
         platform_left_pos = platform_center_pos - platform_right*platform_width/2
         platform_right_pos=  platform_center_pos + platform_right*platform_width/2
 
-        # simulate
-
+        # simulate timers
         level_timer += dt
         object_timer += dt
         if level_timer > TIME_PER_LEVEL:
@@ -109,17 +111,18 @@ while running:
             right_most = screen_width/2+platform_width/2
             falling_objects.append(FallingObject(Vector2(left_most + rng.random()*right_most,0)))
 
-        # move the ball
+        # simulate ball motion and object motion
         ball_acc = gravity 
         ball_vel += ball_acc*dt
         ball_new_pos = ball_pos + ball_vel*dt
         ball_displacement = ball_new_pos - ball_pos
         for o in falling_objects:
             o.move(dt)
+            # deal with objects hitting the ball
             if intersection_tests.check_intersect_circle_circle(ball_new_pos,ball_radius,o.position,o.radius):
                 game_over = True
 
-        # deal with intersections and adjust pos and vel accordingly
+        # deal with floor/side intersections and adjust pos and vel accordingly.  Bounce off the sides by reversing the x velocity
         if ball_new_pos.y > screen_height: # ball hit the floor
             game_over = True
         if ball_new_pos.x > screen_width:
@@ -151,15 +154,17 @@ while running:
         for o in falling_objects:
             pygame.draw.circle(screen,(0,255,255),o.position,o.radius)
         
-        text_surface = font.render(f"Level {difficulty}", True, (255,255,255)) # this gives a surface
-        screen.blit(text_surface,text_surface.get_rect()) # which we have to blit to the screen
+        # draw the level on the screen
+        text_surface = font.render(f"Level {difficulty}", True, (255,255,255)) 
+        screen.blit(text_surface,text_surface.get_rect()) 
         
     else:
-        text_surface = font.render(f"Game Over! Hit R to Restart", True, (255,255,255)) # this gives a surface
+        #draw our game over message, and instructions to reset
+        text_surface = font.render(f"Game Over! Hit R to Restart", True, (255,255,255)) 
         r = text_surface.get_rect()
         r.center = (screen_width/2,screen_height/2)
-        screen.blit(text_surface,r) # which we have to blit to the screen
-        if keys[pygame.K_r]: # a simple reset
+        screen.blit(text_surface,r) 
+        if keys[pygame.K_r]: # a simple reset (would be good to put this all in a class, so it wasn't repetitive)
             game_over = False
             level_timer = 0
             object_timer = 0
@@ -168,8 +173,11 @@ while running:
             platform_tilt_angle = 0
             falling_objects = []
             
+    # we always tick the clock and flip the display
     dt = clock.tick(tick_rate)/1000
     pygame.display.flip()
+
+# the window was closed, clean up
 pygame.quit()
 if USE_M5STICK:
-    m5stick.close()
+    m5stick.close() # this quits the thread
