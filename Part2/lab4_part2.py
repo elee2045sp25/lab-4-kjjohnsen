@@ -11,7 +11,7 @@ PLATFORM_WIDTH = 400
 OBJECT_RADIUS = 10
 BALL_RADIUS = 20
 
-USE_M5STICK = True # set True if BLE M5Stick controller is available
+USE_M5STICK = False # set True if BLE M5Stick controller is available
 M5STICK_NAME = "M5StickCPlus-Kyle"
 
 # helper object to hold the falling object
@@ -21,7 +21,7 @@ class FallingObject:
         self.velocity = Vector2(0,0)
         self.radius = OBJECT_RADIUS
     def move(self,dt):
-        self.position += self.velocity*dt
+        self.position += self.velocity*dt 
         self.velocity += gravity*dt
 
 if USE_M5STICK:
@@ -114,7 +114,7 @@ while running:
         ball_acc = gravity 
         ball_vel += ball_acc*dt
         ball_new_pos = ball_pos + ball_vel*dt
-        ball_displacement = ball_new_pos - ball_pos
+        #ball_displacement = ball_new_pos - ball_pos
         for o in falling_objects:
             o.move(dt)
             # deal with objects hitting the ball
@@ -132,7 +132,7 @@ while running:
             ball_vel.x = -ball_vel.x
 
         # now handle the intersection with the platform.  basically, if the ball intersects the platform, it needs to move along the platform normal.  This is also its new velocity
-        platform_force = Vector2(0,0)
+        #platform_force = Vector2(0,0)
         intersection = intersection_tests.check_intersect_circle_segment(ball_new_pos,ball_radius,platform_left_pos,platform_right_pos)
         if intersection:
             ball_platform = ball_new_pos - platform_center_pos
