@@ -11,7 +11,7 @@ PLATFORM_WIDTH = 400
 OBJECT_RADIUS = 10
 BALL_RADIUS = 20
 
-USE_M5STICK = False # set True if BLE M5Stick controller is available
+USE_M5STICK = True # set True if BLE M5Stick controller is available
 M5STICK_NAME = "M5StickCPlus-Kyle"
 
 # helper object to hold the falling object
@@ -108,8 +108,7 @@ while running:
         if object_timer > 1 + 1/difficulty: # difficulty is every 2 seconds to start, and then goes down
             object_timer = 0
             left_most = screen_width/2-platform_width/2
-            right_most = screen_width/2+platform_width/2
-            falling_objects.append(FallingObject(Vector2(left_most + rng.random()*right_most,0)))
+            falling_objects.append(FallingObject(Vector2(left_most + rng.random()*platform_width,0)))
 
         # simulate ball motion and object motion
         ball_acc = gravity 
